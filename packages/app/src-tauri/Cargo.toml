@@ -23,4 +23,4 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 lifx-core = "0.4.0"
-
+get_if_addrs = "0.5.3"
