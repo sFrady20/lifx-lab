@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::ffi::CString;
 use std::net::{IpAddr, SocketAddr, UdpSocket};
 use std::sync::{Arc, Mutex};
-use std::thread::{sleep, spawn};
+use std::thread::spawn;
 use std::time::{Duration, Instant};
 
 const HOUR: Duration = Duration::from_secs(60 * 60);
@@ -59,8 +59,8 @@ pub enum Color {
     Multi(RefreshableData<Vec<Option<HSBK>>>),
 }
 
-pub impl BulbInfo {
-    fn new(source: u32, target: u64, addr: SocketAddr) -> BulbInfo {
+impl BulbInfo {
+    pub fn new(source: u32, target: u64, addr: SocketAddr) -> BulbInfo {
         BulbInfo {
             last_seen: Instant::now(),
             source,
@@ -179,14 +179,14 @@ impl std::fmt::Debug for BulbInfo {
 }
 
 pub struct Manager {
-    bulbs: Arc<Mutex<HashMap<u64, BulbInfo>>>,
+    pub bulbs: Arc<Mutex<HashMap<u64, BulbInfo>>>,
     last_discovery: Instant,
     sock: UdpSocket,
     source: u32,
 }
 
-pub impl Manager {
-    fn new() -> Result<Manager, failure::Error> {
+impl Manager {
+    pub fn new() -> Result<Manager, failure::Error> {
         let sock = UdpSocket::bind("0.0.0.0:56700")?;
         sock.set_broadcast(true)?;
 
@@ -384,26 +384,5 @@ pub impl Manager {
                 bulb.query_for_missing_info(&self.sock).unwrap();
             }
         }
-    }
-}
-
-fn main() {
-    let mut mgr = Manager::new().unwrap();
-
-    loop {
-        if Instant::now() - mgr.last_discovery > Duration::from_secs(300) {
-            mgr.discover().unwrap();
-        }
-        mgr.refresh();
-
-        println!("\n\n\n\n");
-        if let Ok(bulbs) = mgr.bulbs.lock() {
-            let bulbs = bulbs.values();
-            for bulb in bulbs {
-                println!("{:?}", bulb);
-            }
-        }
-
-        sleep(Duration::from_secs(5));
     }
 }

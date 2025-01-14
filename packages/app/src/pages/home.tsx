@@ -43,6 +43,14 @@ export const HomePage = function () {
         <i className="icon-[lucide--lightbulb]" />
         <div>All Lights On</div>
       </Button>
+      <Button
+        onClick={async () => {
+          await invoke("lights_off");
+        }}
+      >
+        <i className="icon-[lucide--lightbulb-off]" />
+        <div>All Lights Off</div>
+      </Button>
     </main>
   );
 };
