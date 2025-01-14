@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 const HOUR: Duration = Duration::from_secs(60 * 60);
 
 #[derive(Debug)]
-struct RefreshableData<T> {
+pub struct RefreshableData<T> {
     data: Option<T>,
     max_age: Duration,
     last_updated: Instant,
@@ -39,17 +39,17 @@ impl<T> RefreshableData<T> {
 }
 
 pub struct BulbInfo {
-    last_seen: Instant,
+    pub last_seen: Instant,
     source: u32,
-    target: u64,
-    addr: SocketAddr,
-    name: RefreshableData<CString>,
-    model: RefreshableData<(u32, u32)>,
-    location: RefreshableData<CString>,
+    pub target: u64,
+    pub addr: SocketAddr,
+    pub name: RefreshableData<CString>,
+    pub model: RefreshableData<(u32, u32)>,
+    pub location: RefreshableData<CString>,
     host_firmware: RefreshableData<(u16, u16)>,
     wifi_firmware: RefreshableData<(u16, u16)>,
-    power_level: RefreshableData<u16>,
-    color: Color,
+    pub power_level: RefreshableData<u16>,
+    pub color: Color,
 }
 
 #[derive(Debug)]

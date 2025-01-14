@@ -21,7 +21,7 @@ export const HomePage = function () {
   return (
     <main className="flex flex-col gap-2">
       <div className="text-xl font-bold">Lifx Lab</div>
-      <Button
+      {/* <Button
         onClick={async () => {
           const results = await invoke("discover_lights");
           console.log(results);
@@ -29,7 +29,7 @@ export const HomePage = function () {
       >
         <i className="icon-[lucide--search]" />
         <div>Discover Lights</div>
-      </Button>
+      </Button> */}
       <div>
         {devices.map((device) => (
           <div>{device.ip}</div>
