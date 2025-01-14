@@ -62,7 +62,7 @@ async fn discover_lights(state: State<'_, AppState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn lights_off(state: State<'_, AppState>) -> Result<(), String> {
+async fn broadcast(state: State<'_, AppState>, message: lifx::Message) -> Result<(), String> {
     // Create a socket for sending messages
     let socket =
         UdpSocket::bind("0.0.0.0:0").map_err(|e| format!("Failed to bind socket: {}", e))?;
@@ -77,17 +77,10 @@ async fn lights_off(state: State<'_, AppState>) -> Result<(), String> {
             source: 0x72757374,
             ..Default::default()
         };
-        let message = RawMessage::build(
-            &options,
-            Message::LightSetPower {
-                level: 0,
-                duration: 0,
-            },
-        )
-        .unwrap();
-        let bytes = message.pack().unwrap();
+        let raw_message = RawMessage::build(&options, message.clone()).unwrap();
+        let bytes = raw_message.pack().unwrap();
 
-        // connect to the bulb
+        // Connect to the bulb
         socket
             .connect(bulb.addr)
             .map_err(|e| format!("Failed to connect to {}: {}", bulb.addr, e))?;
@@ -101,42 +94,27 @@ async fn lights_off(state: State<'_, AppState>) -> Result<(), String> {
 }
 
 #[tauri::command]
+async fn lights_off(state: State<'_, AppState>) -> Result<(), String> {
+    broadcast(
+        state,
+        Message::LightSetPower {
+            level: 0,
+            duration: 0,
+        },
+    )
+    .await
+}
+
+#[tauri::command]
 async fn lights_on(state: State<'_, AppState>) -> Result<(), String> {
-    // Create a socket for sending messages
-    let socket =
-        UdpSocket::bind("0.0.0.0:0").map_err(|e| format!("Failed to bind socket: {}", e))?;
-
-    // Get the list of bulbs
-    let bulbs = state.bulb_manager.bulbs.lock().unwrap();
-
-    for bulb in bulbs.values() {
-        let options = BuildOptions {
-            target: Some(bulb.target),
-            res_required: true,
-            source: 0x72757374,
-            ..Default::default()
-        };
-        let message = RawMessage::build(
-            &options,
-            Message::LightSetPower {
-                level: 1,
-                duration: 0,
-            },
-        )
-        .unwrap();
-        let bytes = message.pack().unwrap();
-
-        // connect to the bulb
-        socket
-            .connect(bulb.addr)
-            .map_err(|e| format!("Failed to connect to {}: {}", bulb.addr, e))?;
-
-        // Send the message to the bulb
-        socket
-            .send_to(&bytes, &bulb.addr)
-            .map_err(|e| format!("Failed to send message to {}: {}", bulb.addr, e))?;
-    }
-    Ok(())
+    broadcast(
+        state,
+        Message::LightSetPower {
+            level: 1,
+            duration: 0,
+        },
+    )
+    .await
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -154,11 +132,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            discover_lights,
-            lights_on,
-            lights_off
-        ])
+        .invoke_handler(tauri::generate_handler![lights_on, lights_off])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
