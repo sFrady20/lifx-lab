@@ -51,6 +51,18 @@ export const HomePage = function () {
         <i className="icon-[lucide--lightbulb-off]" />
         <div>All Lights Off</div>
       </Button>
+      <Button
+        onClick={async () => {
+          await invoke("lights_set_color", {
+            h: Math.round(Math.random() * 65535),
+            s: Math.round(65535 * 0.5),
+            b: Math.round(65535 * 0.5),
+          });
+        }}
+      >
+        <i className="icon-[lucide--lightbulb-off]" />
+        <div>All Lights Random</div>
+      </Button>
     </main>
   );
 };

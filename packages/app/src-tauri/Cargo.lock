@@ -2009,6 +2009,7 @@ dependencies = [
  "failure",
  "get_if_addrs",
  "lifx-core",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "tauri",
